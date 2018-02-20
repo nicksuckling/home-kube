@@ -144,12 +144,14 @@ metadata:
   name: monitoring-grafana
   namespace: kube-system
   annotations:
-    traefik.frontend.rule.type: pathprefixstrip
+    kubernetes.io/ingress.class: "nginx"
+    dns.alpha.kubernetes.io/external: "true"
 spec:
   rules:
-  - http:
+  - host: grafana.megaloop1.co.uk
+    http:
       paths:
-      - path: /grafana
+      - path: /
         backend:
           serviceName: monitoring-grafana
           servicePort: 80

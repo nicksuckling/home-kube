@@ -1,28 +1,46 @@
-apiVersion: extensions/v1beta1
 kind: Deployment
+apiVersion: extensions/v1beta1
 metadata:
   name: dns-controller
   namespace: kube-system
+  labels:
+    k8s-addon: dns-controller.addons.k8s.io
+    k8s-app: dns-controller
+    version: v1.8.0-beta.2
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: dns-controller
   template:
     metadata:
       labels:
-        app: dns-controller
+        k8s-addon: dns-controller.addons.k8s.io
+        k8s-app: dns-controller
+        version: v1.8.0-beta.2
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        # For 1.6, we keep the old tolerations in case of a downgrade to 1.5
+        scheduler.alpha.kubernetes.io/tolerations: '[{"key": "dedicated", "value": "master"}]'
     spec:
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        effect: NoSchedule
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      dnsPolicy: Default  # Don't use cluster DNS (we are likely running before kube-dns)
+      hostNetwork: true
+      serviceAccount: dns-controller
       containers:
       - name: dns-controller
         image: nicksuckling/dns-controller-arm:1.8.0-beta.2
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: aws-credentials
-          mountPath: /root/.aws/
-          readOnly: true
-      serviceAccount: dns-controller
-      volumes:
-      - name: aws-credentials
-        secret:
-          secretName: aws-creds-route53
+        command:
+        args: ["--dns", "aws-route53", "--watch-ingress"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+
 ---
 
 apiVersion: v1
@@ -79,4 +97,3 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
   name: system:serviceaccount:kube-system:dns-controller
-
