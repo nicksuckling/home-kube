@@ -1,0 +1,31 @@
+node {
+
+    checkout scm
+
+    env.DOCKER_API_VERSION="1.23"
+
+    sh "git rev-parse --short HEAD > commit-id"
+
+    tag = readFile('commit-id').replace("\n", "").replace("\r", "")
+    appName = "vault"
+    registryHost = "127.0.0.1:30912/"
+    imageName = "${registryHost}${appName}:${tag}"
+    env.BUILDIMG=imageName
+
+    stage "Build"
+
+      # https://blog.hypriot.com/post/setup-simple-ci-pipeline-for-arm-images/
+
+      ### Register QEMU in the build agent
+      docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+       ### Build ARM app
+       docker build -t vault .
+
+    stage "Push"
+
+        sh "docker push ${imageName}"
+
+    stage "Deploy"
+
+}

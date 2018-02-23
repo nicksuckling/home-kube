@@ -151,7 +151,7 @@ spec:
   - host: grafana.megaloop1.co.uk
     http:
       paths:
-      - path: /
+      - path: /grafana
         backend:
           serviceName: monitoring-grafana
           servicePort: 80
