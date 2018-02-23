@@ -14,12 +14,8 @@ node {
 
     stage "Build"
 
-      # https://blog.hypriot.com/post/setup-simple-ci-pipeline-for-arm-images/
-
-      ### Register QEMU in the build agent
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
-       ### Build ARM app
        docker build -t vault .
 
     stage "Push"
