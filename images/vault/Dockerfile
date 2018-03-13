@@ -1,6 +1,5 @@
 ### Choose a base image with QEMU binary
 FROM hypriot/rpi-alpine
-
 # This is the release of Vault to pull in.
 ENV VAULT_VERSION=0.9.4
 

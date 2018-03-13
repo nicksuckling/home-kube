@@ -12,11 +12,13 @@ node {
     imageName = "${registryHost}${appName}:${tag}"
     env.BUILDIMG=imageName
 
-    stage "Build"
+    stage "Post Build"
 
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
-       docker build -t vault .
+    stage "Build"
+
+    docker build -t vault .
 
     stage "Push"
 
